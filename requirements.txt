@@ -1,0 +1,17 @@
+ttkbootstrap>=1.10.1
+chardet>=5.2.0
+watchdog>=3.0.0
+tkinterdnd2>=0.3.0
+matplotlib>=3.8.0
+pandas>=2.1.0
+openpyxl>=3.1.2
+numpy>=1.26.0
+seaborn>=0.13.0  # 用于更美观的图表
+pillow>=10.0.0   # 用于图像处理
+xlsxwriter>=3.1.0  # 用于Excel导出增强支持
+wordcloud>=2.3.0  # 用于生成词云
+jieba>=0.42.1  # 中文分词库
+beautifulsoup4>=4.12.2  # 用于HTML解析
+plotly>=5.15.0  # 用于交互式图表
+requests>=2.31.0  # 用于网络请求
+jinja2>=3.1.2  # 用于模板渲染
