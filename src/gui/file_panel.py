@@ -5,25 +5,6 @@ from ttkbootstrap.constants import *
 from tkinter import filedialog
 import datetime
 
-def init_dnd():
-    """初始化拖放支持"""
-    try:
-        from tkinterdnd2 import DND_FILES, TkinterDnD
-        # 测试 tkdnd 命令是否可用
-        test_root = tk.Tk()
-        try:
-            test_root.tk.call('package', 'require', 'tkdnd')
-            test_root.destroy()
-            return True, DND_FILES, TkinterDnD
-        except tk.TclError:
-            test_root.destroy()
-            return False, None, None
-    except (ImportError, tk.TclError):
-        return False, None, None
-
-# 全局初始化拖放
-DND_AVAILABLE, DND_FILES, TkinterDnD = init_dnd()
-
 from src.utils.tooltip import ToolTip
 
 class FilePanel:
@@ -66,45 +47,10 @@ class FilePanel:
         self.file_list.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # 尝试启用拖放功能
-        if DND_AVAILABLE:
-            try:
-                self.file_list.drop_target_register(DND_FILES)
-                self.file_list.dnd_bind('<<Drop>>', self._on_drop)
-            except (tk.TclError, AttributeError) as e:
-                print(f"注意: 拖放功能初始化失败 - {e}")
-        
         # 绑定文件选择事件
         self.file_list.bind('<<ListboxSelect>>', self.app.on_file_select)
         self.file_list.bind('<Double-Button-1>', self._on_double_click)
         
-    def _on_drop(self, event):
-        """处理文件拖放事件"""
-        if not DND_AVAILABLE:
-            return
-            
-        try:
-            # 解析拖放的文件路径
-            files = event.widget.tk.splitlist(event.data)
-            if files:
-                path = Path(files[0])
-                if path.is_dir():
-                    self.current_dir = path
-                    self.refresh_files()
-                elif path.is_file():
-                    self.current_dir = path.parent
-                    self.refresh_files()
-                    # 选中拖放的文件
-                    try:
-                        idx = self.file_list.get(0, "end").index(path.name)
-                        self.file_list.selection_clear(0, "end")
-                        self.file_list.selection_set(idx)
-                        self.app.on_file_select(None)
-                    except ValueError:
-                        pass
-        except Exception as e:
-            print(f"处理拖放事件时出错: {e}")
-
     def _on_double_click(self, event):
         """处理双击事件"""
         selection = self.file_list.curselection()

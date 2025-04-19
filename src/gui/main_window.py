@@ -12,30 +12,6 @@ from datetime import datetime
 from typing import List
 import multiprocessing
 
-def init_tkdnd():
-    """初始化 tkdnd 并处理可能的错误"""
-    try:
-        # 先尝试导入模块
-        from tkinterdnd2 import DND_FILES, TkinterDnD
-        
-        # 测试 tkdnd 包是否可用
-        test_root = tk.Tk()
-        try:
-            test_root.tk.call('package', 'require', 'tkdnd')
-            test_root.destroy()
-            return True, DND_FILES, TkinterDnD
-        except tk.TclError as e:
-            print(f"注意: tkdnd 包不可用 - {e}")
-            test_root.destroy()
-            return False, None, None
-    except Exception as e:
-        print(f"注意: tkinterdnd2 初始化失败 - {e}")
-        return False, None, None
-
-# 全局初始化 tkdnd
-TKDND_AVAILABLE, DND_FILES, TkinterDnD = init_tkdnd()
-BaseClass = TkinterDnD.Tk if TKDND_AVAILABLE else tk.Tk
-
 # 导入其他模块
 from src.gui.file_panel import FilePanel
 from src.gui.config_panel import ConfigPanel
@@ -50,18 +26,9 @@ from src.utils.thread_pool import ThreadPoolManager
 from src.gui.regex_tester import RegexTester
 from src.core.log_analyzer import LogAnalyzer
 
-class LogFilterGUI(BaseClass):
+class LogFilterGUI(tk.Tk):
     def __init__(self):
-        try:
-            # 初始化基类
-            super().__init__()
-        except Exception as e:
-            print(f"GUI 初始化错误: {e}")
-            # 如果 TkinterDnD 失败，回退到基本的 tk
-            global TKDND_AVAILABLE
-            TKDND_AVAILABLE = False
-            self.__class__.__bases__ = (tk.Tk,)
-            super().__init__()
+        super().__init__()
         
         # 加载配置
         self.config_manager = ConfigManager()
@@ -71,7 +38,7 @@ class LogFilterGUI(BaseClass):
         # 设置主题
         self.style = ttkb.Style(theme=config.get('theme', 'litera'))
         
-        self.title("日志过滤工具" + (" [拖放已禁用]" if not TKDND_AVAILABLE else ""))
+        self.title("日志过滤工具")
         self.geometry(config.get('window_size', "1500x750"))
         
         # 初始化处理器和队列
@@ -104,9 +71,6 @@ class LogFilterGUI(BaseClass):
         
         # 窗口居中显示
         self.center_window()
-        
-        if not TKDND_AVAILABLE:
-            self.log_info("提示: 拖放功能不可用，请使用文件选择对话框")
 
     def toggle_live_preview(self):
         """处理实时预览切换"""
